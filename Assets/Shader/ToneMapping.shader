@@ -32,12 +32,21 @@
 					float2 uv : TEXCOORD0;
 					float4 vertex : SV_POSITION;
 				};
-
+				float3 ChangeBright(float3 color,float adapted_lum)
+				{
+					color *= adapted_lum;
+					return color;
+				}
 				float3 ReinhardToneMapping(float3 color,float adapted_lum)
 				{
 					_MiddleGrey = 1;
 					color *= _MiddleGrey / adapted_lum;
 					return color / (1.0f + color);
+				}
+
+				float3 CEToneMapping(float3 color, float adapted_lum)
+				{
+					return 1 - exp(-adapted_lum * color);
 				}
 
 				float3 ACESToneMapping(float3 color, float adapted_lum)
@@ -60,13 +69,12 @@
 					return o;
 				}
 
-				
+
 
 				fixed4 frag(v2f i) : SV_Target
 				{
 					fixed4 col = tex2D(_MainTex, i.uv);
-				// just invert the colors
-				col.rgb = ACESToneMapping(col.rgb, _Lum);
+				col.rgb = ChangeBright(col.rgb, _Lum);
 				return col;
 			}
 			ENDCG
